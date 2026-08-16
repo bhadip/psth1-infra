@@ -1,7 +1,8 @@
 # psth1 Infrastructure
 
 ######
-# One small non-security note, just for your awareness, not a blocker: this file references an absolute host path (/home/tom/docker/mt4-server/certs) rather than a relative one — meaning if you ever restore this repo onto a different machine (or a fresh psth1 after a full reinstall), that exact path would need to exist for the container to start. Not a secret leak, just a portability wrinkle worth knowing about — not worth fixing right now, but good to remember if this repo is ever used to rebuild psth1 from scratch someday.
+One small non-security note, just for your awareness, not a blocker:
+This file references an absolute host path (/home/tom/docker/mt4-server/certs) rather than a relative one — meaning if you ever restore this repo onto a different machine (or a fresh psth1 after a full reinstall), that exact path would need to exist for the container to start. Not a secret leak, just a portability wrinkle worth knowing about — not worth fixing right now, but good to remember if this repo is ever used to rebuild psth1 from scratch someday.
 ######
 
 Home server (Dell Latitude E5432, Debian 13, 4GB RAM) running live forex
