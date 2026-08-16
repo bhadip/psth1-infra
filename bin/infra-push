@@ -1,0 +1,14 @@
+#!/bin/bash
+cd ~/psth1-infra
+VERSION=$(cat VERSION 2>/dev/null || echo "0.1")
+if [ -n "$1" ]; then COMMIT_MSG="v${VERSION}: $1"
+else COMMIT_MSG="v${VERSION}: Update $(date '+%Y-%m-%d %H:%M')"; fi
+if git diff --quiet && git diff --staged --quiet; then
+    echo "✅ Nothing to commit, working tree clean"; exit 0
+fi
+git add -A
+git commit -m "$COMMIT_MSG"
+git tag "v${VERSION}"
+git push origin main
+git push origin "v${VERSION}"
+echo "✅ Committed and tagged as v${VERSION}"

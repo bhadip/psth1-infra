@@ -1,0 +1,31 @@
+{
+    auto_https off
+}
+
+:80 {
+    @www host www.prasanti.com
+    handle @www {
+        root * /srv/site
+        file_server
+    }
+
+    @exaguard host exaguard.prasanti.com
+    handle @exaguard {
+        redir https://www.youtube.com/watch?v=d-DKSMRNshY permanent
+    }
+
+    @bambang host bambang.prasanti.com
+    handle @bambang {
+        redir https://www.linkedin.com/in/bambanghadipraptomo permanent
+    }
+
+    @gita host gita.prasanti.com
+    handle @gita {
+        redir https://www.linkedin.com/in/gitaprasanti/ permanent
+    }
+
+    @aisha host aisha.prasanti.com
+    handle @aisha {
+        redir https://www.linkedin.com/in/aishamaharani/ permanent
+    }
+}

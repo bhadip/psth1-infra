@@ -1,0 +1,31 @@
+services:
+  mt4-desktop:
+    build: .
+    image: mt4-desktop-custom:latest
+    container_name: mt4-desktop
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      - PID=1000
+      - GID=1000
+      - TZ=Asia/Kuala_Lumpur
+      - SUBFOLDER=/
+      - TITLE=MetaTrader4-Server
+      - DISPLAY=:1
+    volumes:
+      - ./config:/config
+    ports:
+      - "100.75.220.84:9090:3000"
+    restart: unless-stopped
+
+  caddy-mt4:
+    image: caddy:2-alpine
+    container_name: mt4-https-proxy
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./certs:/certs
+    ports:
+      - "100.75.220.84:9443:9443"
+    depends_on:
+      - mt4-desktop

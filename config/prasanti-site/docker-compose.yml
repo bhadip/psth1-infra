@@ -1,0 +1,24 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: prasanti-caddy
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./site:/srv/site
+    networks:
+      - prasanti-net
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: prasanti-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    networks:
+      - prasanti-net
+
+networks:
+  prasanti-net:
+    driver: bridge

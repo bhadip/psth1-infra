@@ -1,0 +1,28 @@
+services:
+  adguard-home:
+    image: adguard/adguardhome
+    container_name: adguard-home
+    restart: unless-stopped
+    ports:
+      - "192.168.50.2:53:53/tcp"
+      - "192.168.50.2:53:53/udp"
+    volumes:
+      - ./work:/opt/adguardhome/work
+      - ./conf:/opt/adguardhome/conf
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  adguard-https-proxy:
+    image: caddy:2-alpine
+    container_name: adguard-https-proxy
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - /home/tom/docker/mt4-server/certs:/certs:ro
+    ports:
+      - "100.75.220.84:3000:3000"
+    depends_on:
+      - adguard-home

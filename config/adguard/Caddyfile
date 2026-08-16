@@ -1,0 +1,4 @@
+:3000 {
+    tls /certs/psth1.gila-karat.ts.net.crt /certs/psth1.gila-karat.ts.net.key
+    reverse_proxy adguard-home:3000
+}

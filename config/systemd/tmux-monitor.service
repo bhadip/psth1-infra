@@ -1,0 +1,16 @@
+[Unit]
+Description=Persistent tmux monitor session for MT4
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=forking
+User=tom
+Environment=HOME=/home/tom
+Environment=USER=tom
+ExecStart=/usr/bin/tmux -S /home/tom/.tmux-monitor.sock new-session -d -s monitor "docker logs -f mt4-desktop"
+ExecStop=/usr/bin/tmux -S /home/tom/.tmux-monitor.sock kill-session -t monitor
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
