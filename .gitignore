@@ -3,3 +3,8 @@
 *.crt
 work/
 conf/AdGuardHome.yaml
+
+# AI Workspace Secrets
+config/ai-workspace/.env
+config/code-server/
+config/open-webui/

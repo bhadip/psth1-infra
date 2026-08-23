@@ -1,0 +1,34 @@
+name: psth1-coding
+
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - PASSWORD=${CODE_SERVER_PASSWORD}
+      - SUDO_PASSWORD=${SUDO_PASSWORD}
+      - PROXY_DOMAIN=code.prasanti.com
+    volumes:
+      - ./config/code-server:/config
+      - ./workspace:/config/workspace
+    ports:
+      - "8443:8443"
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    environment:
+      - OPENAI_API_BASE_URL=${QWEN_BASE_URL}
+      - OPENAI_API_KEY=${QWEN_API_KEY}
+      - ENABLE_SIGNUP=true
+    volumes:
+      - ./config/open-webui:/app/backend/data
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
