@@ -1,7 +1,7 @@
 # AI Coding Workspace (psth1)
 
 ## 1. Final Recommendation
-The optimal stack for a free, light, and autonomous AI coding workspace on `psth1` (Dell Latitude 5430 (2012), 8GB RAM) is:
+The optimal stack for a free, light, and autonomous AI coding workspace on `psth1` (Dell Latitude 5430 (2012), 8GB RAM is:
 - **Code-Server**: VS Code running in the browser for manual editing and terminal access.
 - **Open-WebUI**: Chat interface for documentation, brainstorming, and screenshot/vision analysis.
 - **Aider**: Lightweight, terminal-based autonomous multi-file coding agent.
