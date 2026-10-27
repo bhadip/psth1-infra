@@ -1,52 +1,38 @@
-# Troubleshooting — MT4 Trading
+## Dashboard Status is DISCONNECTED
+**Symptom:** Dashboard status is DISCONNECTED.
+**Cause:** EA doesn't allow web request list by default for security purpose.
+**Fix:** Make sure `https://aegis.prasanti.com` is added in **Tools** > **Options** > **Expert Advisors** > **Allow WebRequest for listed URL**.
 
-## Cheat sheet
-Ports: 9443 HTTPS | 9090 HTTP (legacy) — both Tailscale-interface only
-Logs: `tmux -S /home/tom/.tmux-monitor.sock attach -t monitor`
-Containers: mt4-desktop, mt4-https-proxy
+## KasmVNC Clipboard Crash ("Kasm encountered an error")
+**Symptom:** Browser shows `InvalidStateError: Failed to execute 'getType' on 'ClipboardItem'` and the VNC session freezes or crashes when switching MT4 windows or pasting.
+**Fix:**
+1. Hard refresh the browser (`Ctrl+Shift+R`).
+2. Open the Kasm sidebar menu (left edge of screen) -> **Settings**.
+3. Turn **OFF**: `Clipboard Seamless`, `Clipboard Up`, and `Clipboard Down`.
 
-## Symptom -> Cause -> Fix
-1. `docker ps` shows containers Up but PORTS column empty
-   Docker started before Tailscale had assigned 100.75.220.84, so
-   binding to that specific IP silently failed. -> confirm
-   `/etc/systemd/system/docker.service.d/wait-for-tailscale.conf`
-   exists (ExecStartPre loops until `tailscale ip -4` succeeds).
-   Immediate fix: `docker compose down && docker compose up -d`.
+## Second MT4 Instance Not Appearing or Sharing Login
+**Symptom:** Opening a second MT4 window just shows the same account/login as the first one.
+**Cause:** Clicking the same desktop shortcut twice opens multiple windows of the *same* terminal process.
+**Fix:** Ensure you are launching the distinct duplicated folder.
+1. Verify two processes are running: `docker exec mt4-desktop ps aux | grep terminal.exe`
+2. If only one is running, manually launch the second: `docker exec -d -u abc mt4-desktop /usr/lib/wine/wine64 "/config/.wine/drive_c/Program Files (x86)/MetaTrader 4 - CT/terminal.exe"`
+3. Ensure you have a separate desktop shortcut for the CT account.
 
-2. `sudo reboot` powers the machine off but it never comes back
-   iTCO_wdt hardware watchdog interferes with the ACPI reboot handoff
-   on this chipset (`journalctl -b -1` shows "watchdog did not stop!").
-   -> `echo "blacklist iTCO_wdt" | sudo tee /etc/modprobe.d/blacklist-watchdog.conf`
-   then `sudo update-initramfs -u`.
+## Permission Denied when SCP'ing .mq4 files
+**Symptom:** `scp: dest open ".../MQL4/Experts/file.mq4": Permission denied`
+**Cause:** The bind-mounted `.wine` directory was created by the container as `root` or `abc`, and the host user `tom` lacks write access.
+**Fix:** Run this on the `psth1` host:
+```bash
+ssh -t tom@100.75.220.84 "sudo chown -R 1000:1000 '/home/tom/docker/mt4-server/config/.wine/drive_c/Program Files (x86)/MetaTrader 4/MQL4/'"
 
-3. `wine: '...' is a 64-bit installation, it cannot be used with a
-   32-bit wineserver`
-   Wine prefix is 64-bit; plain `wine` binary defaults to 32-bit.
-   -> use `/usr/lib/wine/wine64` explicitly (find via
-   `dpkg -L wine64 | grep bin` if path changes after a rebuild).
+## MT4 "can't open program file" Error
+**Symptom:** MetaEditor log shows can't open "C:\Program Files (x86)\MetaTrader 4\MQL4\Experts\file.mq4" program file.
+**Cause:** Wine internal file mapping permissions or path spacing issues.
+**Fix:**
+Fix container ownership: docker exec -u root mt4-desktop chown -R abc:abc '/config/.wine/drive_c/Program Files (x86)/MetaTrader 4/MQL4/'
+If it persists, use MetaEditor's File -> Open (Ctrl+O) instead of double-clicking in the Navigator.
 
-4. Container recreated/rebuilt and Wine is gone, MT4 won't launch
-   Wine lives in image layers, not the bind-mounted /config — a fresh
-   container from an old (pre-Dockerfile) image won't have it.
-   -> confirm using `mt4-desktop-custom:latest` (built from the repo's
-   Dockerfile), not the bare `linuxserver/webtop` image.
-
-5. Container deleted accidentally (e.g. via `docker system prune`)
-   Check `/home/tom/docker/mt4-server/config` first — if it's a bind
-   mount (it is, by design), the Wine prefix + MT4 install + broker
-   session survive on disk regardless. Just
-   `docker compose up -d` to recreate the container; nothing lost.
-   NEVER run `docker system prune -af --volumes` without excluding
-   or manually confirming MT4 containers are not in the stop/remove
-   list first.
-
-6. HTTPS cert errors / can't reach :9443
-   Tailscale cert issuance occasionally hits a known upstream bug
-   (500 error on the ACME DNS-01 challenge, tailscale/tailscale#19942).
-   -> `tailscale serve reset && tailscale down && tailscale up`
-   (needs `sudo tailscale set --operator=tom` once, to run without
-   sudo), then retry `sudo tailscale cert psth1.gila-karat.ts.net`.
-
-7. KasmVNC window only fills part of the screen
-   -> in-session settings (side tab, gear icon) -> Screen/Display ->
-   set "Remote Resizing" (not fixed resolution / local scaling).
+## Docker Compose YAML Parse Error
+**Symptom:** go-yaml load error in parser... did not find expected key when running docker compose up.
+**Cause:** Incorrect indentation or invalid characters added to docker-compose.yml (often from automated sed commands).
+**Fix:** Open docker-compose.yml in nano or vim, check the indentation of the environment: block, and ensure no stray characters exist. Run docker compose config to validate.
