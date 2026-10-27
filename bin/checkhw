@@ -1,0 +1,15 @@
+echo "=== OS ===" && cat /etc/os-release | grep -E "PRETTY_NAME|VERSION"
+echo
+echo "=== CPU ===" && nproc --all && lscpu | grep -E "Model name|Virtualization"
+echo
+echo "=== RAM (total/used/free) ===" && free -h
+echo
+echo "=== Disk space (root + any Docker data dir) ===" && df -h / /var/lib/docker 2>/dev/null
+echo
+echo "=== Kernel ===" && uname -r
+echo
+echo "=== Docker installed? ===" && (docker --version && docker info --format 'Docker sees: {{.NCPU}} CPUs, {{.MemTotal}} bytes RAM' 2>/dev/null || echo "Docker not installed")
+echo
+echo "=== KVM available (optional, for heavier sandboxing) ===" && (ls /dev/kvm 2>/dev/null && echo "KVM present" || echo "No KVM — not required, Docker sandboxing doesn't need it")
+echo
+echo "=== Build toolchain (only needed if self-building MindsHub) ===" && (node -v 2>/dev/null || echo "node: not found") && (python3 --version 2>/dev/null || echo "python3: not found")
